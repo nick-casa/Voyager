@@ -19,6 +19,7 @@ class Voyager:
         self,
         mc_port: int = None,
         azure_login: Dict[str, str] = None,
+        azure_openai_creds: Dict[str, str] = None,
         server_port: int = 3000,
         openai_api_key: str = None,
         env_wait_ticks: int = 20,
