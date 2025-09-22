@@ -1,0 +1,3 @@
+async function craftStoneAxe(bot) {
+    // The function crafts a stone axe using a crafting table and equips it in the bot's hand. It first checks if there are enough cobblestones in the inventory, and if not, mines them. Then, it places a crafting table near the bot and crafts a stone axe using it. Finally, it equips the stone axe in the bot's hand.
+}

@@ -1,0 +1,3 @@
+async function craftStoneArmor(bot) {
+    // The function crafts a full set of stone armor for the bot if the version of Minecraft has stone armor. It checks if the bot has the recipe and required materials for crafting each piece of armor. If not, it mines the required materials. After crafting each piece of armor, it equips the full set of stone armor.
+}

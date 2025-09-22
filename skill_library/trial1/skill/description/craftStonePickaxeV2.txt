@@ -1,0 +1,3 @@
+async function craftStonePickaxe(bot) {
+    // The function checks if there is a stone pickaxe in the inventory, and if not, crafts one using the available resources in the inventory. If a stone pickaxe is already available, it sends a message saying so.
+}

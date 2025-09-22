@@ -1,9 +1,11 @@
+import os
 import re
 import time
+import random
 
 import voyager.utils as U
 from javascript import require
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import AzureChatOpenAI
 from langchain.prompts import SystemMessagePromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
@@ -21,7 +23,9 @@ class ActionAgent:
         resume=False,
         chat_log=True,
         execution_error=True,
+        memory_agent=None
     ):
+        self.memory_agent = memory_agent
         self.ckpt_dir = ckpt_dir
         self.chat_log = chat_log
         self.execution_error = execution_error
@@ -31,7 +35,12 @@ class ActionAgent:
             self.chest_memory = U.load_json(f"{ckpt_dir}/action/chest_memory.json")
         else:
             self.chest_memory = {}
-        self.llm = ChatOpenAI(
+        self.llm = AzureChatOpenAI(
+            openai_api_base= os.environ["AZURE_BASE"],
+            openai_api_version="2023-05-15",
+            deployment_name='gpt4',
+            openai_api_key= os.environ["OPENAI_API_KEY"],
+            openai_api_type="azure",
             model_name=model_name,
             temperature=temperature,
             request_timeout=request_timout,
@@ -122,6 +131,31 @@ class ActionAgent:
                 health = event["status"]["health"]
                 hunger = event["status"]["food"]
                 position = event["status"]["position"]
+                if position:
+                    nearby_positions = self.generate_nearby_positions(position)
+                    next_position = self.memory_agent.guide_exploration(position, nearby_positions)
+                    #from position and next_position's x and z coordicates, calculate ordinal direction
+                    x1, y1, z1 = position['x'], position['y'], position['z']
+                    x2, y2, z2 = next_position
+                    dx = x2 - x1
+                    dz = z2 - z1
+                    if dx > 0 and dz > 0:
+                        direction = "southeast"
+                    elif dx > 0 and dz < 0:
+                        direction = "northeast"
+                    elif dx < 0 and dz > 0:
+                        direction = "southwest"
+                    elif dx < 0 and dz < 0:
+                        direction = "northwest"
+                    elif dx > 0 and dz == 0:
+                        direction = "east"
+                    elif dx < 0 and dz == 0:
+                        direction = "west"
+                    elif dx == 0 and dz > 0:
+                        direction = "south"
+                    elif dx == 0 and dz < 0:
+                        direction = "north"
+
                 equipment = event["status"]["equipment"]
                 inventory_used = event["status"]["inventoryUsed"]
                 inventory = event["inventory"]
@@ -195,6 +229,11 @@ class ActionAgent:
             observation += f"Critique: {critique}\n\n"
         else:
             observation += f"Critique: None\n\n"
+
+        if next_position:
+            observation += f"Next exploration target: {direction}\n\n"
+        else:
+            observation += f"Next exploration target: None\n\n"
 
         return HumanMessage(content=observation)
 
@@ -278,3 +317,25 @@ class ActionAgent:
                 if item:
                     chatlog.add(item)
         return "I also need " + ", ".join(chatlog) + "." if chatlog else ""
+
+
+
+    def generate_nearby_positions(self, current_position, radius=100, num_positions=5):
+        # Generate a list of random nearby positions within a specified radius
+        x, y, z = current_position['x'], current_position['y'], current_position['z']
+        nearby_positions = []
+
+        for _ in range(num_positions):
+            dx = random.uniform(-radius, radius)
+            dy = random.uniform(-radius, radius)
+            dz = random.uniform(-radius, radius)
+
+            # Calculate the new position
+            new_x = x + dx
+            new_y = y + dy
+            new_z = z + dz
+
+            # Add the new position to the list
+            nearby_positions.append({'x': new_x, 'y': new_y, 'z': new_z})
+
+        return nearby_positions

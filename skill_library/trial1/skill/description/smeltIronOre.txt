@@ -1,0 +1,3 @@
+async function smeltIronOre(bot) {
+    // The function is about smelting 5 iron ores into 5 iron ingots using a furnace and coal as fuel. It first checks if there is a furnace in the inventory, and if not, crafts one using cobblestone. Then it finds a suitable position to place the furnace and places it there. If there is not enough coal in the inventory, it mines coal_ore to obtain coal. Finally, it smelts 5 iron_ore using the available coal as fuel.
+}

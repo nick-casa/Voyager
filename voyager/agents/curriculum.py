@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import random
 import re
+import os
 
 import voyager.utils as U
 from voyager.prompts import load_prompt
 from voyager.utils.json_utils import fix_and_parse_json
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import AzureChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.vectorstores import Chroma
@@ -25,13 +26,25 @@ class CurriculumAgent:
         mode="auto",
         warm_up=None,
         core_inventory_items: str | None = None,
+        memory_agent=None,
     ):
-        self.llm = ChatOpenAI(
+        self.memory_agent = memory_agent
+        self.llm = AzureChatOpenAI(
+            openai_api_base= os.environ["AZURE_BASE"],
+            openai_api_version="2023-05-15",
+            deployment_name='gpt4',
+            openai_api_key= os.environ["OPENAI_API_KEY"],
+            openai_api_type="azure",
             model_name=model_name,
             temperature=temperature,
             request_timeout=request_timout,
         )
-        self.qa_llm = ChatOpenAI(
+        self.qa_llm = AzureChatOpenAI(
+            openai_api_base= os.environ["AZURE_BASE"],
+            openai_api_version="2023-05-15",
+            deployment_name='gpt4',
+            openai_api_key= os.environ["OPENAI_API_KEY"],
+            openai_api_type="azure",
             model_name=qa_model_name,
             temperature=qa_temperature,
             request_timeout=request_timout,
@@ -57,7 +70,7 @@ class CurriculumAgent:
         # vectordb for qa cache
         self.qa_cache_questions_vectordb = Chroma(
             collection_name="qa_cache_questions_vectordb",
-            embedding_function=OpenAIEmbeddings(),
+            embedding_function=OpenAIEmbeddings(deployment="embedding"),
             persist_directory=f"{ckpt_dir}/curriculum/vectordb",
         )
         assert self.qa_cache_questions_vectordb._collection.count() == len(
@@ -211,6 +224,19 @@ class CurriculumAgent:
         observation = self.render_observation(
             events=events, chest_observation=chest_observation
         )
+
+        # Extract the current position from the latest observation event
+        current_position = events[-1][1]["status"]["position"] if events else None
+
+        # Generate nearby positions and guide exploration
+        if current_position:
+            nearby_positions = self.generate_nearby_positions(current_position)
+            next_position = self.memory_agent.guide_exploration(current_position, nearby_positions)
+
+            # Add exploration guidance to the message content
+            content += f"Next exploration target: {next_position}\n\n"
+
+
         if self.progress >= self.warm_up["context"]:
             questions, answers = self.run_qa(
                 events=events, chest_observation=chest_observation
@@ -496,3 +522,25 @@ class CurriculumAgent:
         qa_answer = self.qa_llm(messages).content
         print(f"\033[31mCurriculum Agent {qa_answer}\033[0m")
         return qa_answer
+
+
+    
+    def generate_nearby_positions(self, current_position, radius=100, num_positions=5):
+        # Generate a list of random nearby positions within a specified radius
+        x, y, z = current_position['x'], current_position['y'], current_position['z']
+        nearby_positions = []
+
+        for _ in range(num_positions):
+            dx = random.uniform(-radius, radius)
+            dy = random.uniform(-radius, radius)
+            dz = random.uniform(-radius, radius)
+
+            # Calculate the new position
+            new_x = x + dx
+            new_y = y + dy
+            new_z = z + dz
+
+            # Add the new position to the list
+            nearby_positions.append({'x': new_x, 'y': new_y, 'z': new_z})
+
+        return nearby_positions

@@ -33,8 +33,8 @@ Task: Mine 3 wood logs
 RESPONSE:
 {
     "reasoning": "You need to mine 3 wood logs. You have 2 oak logs and 2 spruce logs, which add up to 4 wood logs.",
-    "success": true,
-    "critique": ""
+    "success": True,
+    "critique": "N/A"
 }
 
 INPUT:
@@ -57,8 +57,8 @@ Task: Mine 5 iron_ore
 RESPONSE:
 {
     "reasoning": "Mining iron_ore in Minecraft will get raw_iron. You have 5 raw_iron in your inventory.",
-    "success": true,
-    "critique": ""
+    "success": True,
+    "critique": "N/A"
 }
 
 INPUT:
@@ -73,8 +73,8 @@ Task:  Plant 1 wheat seed.
 RESPONSE:
 {
     "reasoning": "For planting tasks, inventory information is useless. In nearby blocks, there is farmland and wheat, which means you succeed to plant the wheat seed.",
-    "success": true,
-    "critique": ""
+    "success": True,
+    "critique": "N/A"
 }
 
 INPUT:
@@ -87,8 +87,8 @@ Context: ...
 RESPONSE
 {
     "reasoning": "You have rotten flesh in your inventory, which means you successfully killed one zombie.",
-    "success": true,
-    "critique": ""
+    "success": True,
+    "critique": "N/A"
 }
 
 INPUT:
@@ -103,8 +103,8 @@ Context: ...
 RESPONSE
 {
     "reasoning": "For all eating task, if the player's hunger is 20.0, then the player successfully ate the food.",
-    "success": true,
-    "critique": ""
+    "success": True,
+    "critique": "N/A"
 }
 
 INPUT:

@@ -146,6 +146,7 @@ def fix_and_parse_json(
 ) -> Union[str, Dict[Any, Any]]:
     """Fix and parse JSON string"""
     try:
+        json_str = json_str.replace("```json", "").replace("```", "").strip()
         json_str = json_str.replace("\t", "")
         return json.loads(json_str)
     except json.JSONDecodeError as _:  # noqa: F841

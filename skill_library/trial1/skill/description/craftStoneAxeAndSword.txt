@@ -1,0 +1,3 @@
+async function craftStoneAxeAndSword(bot) {
+    // The function crafts a stone axe and a stone sword using a crafting table. It first checks if there are enough cobblestone and sticks in the inventory, and collects the required items if not. Then it finds a valid position to place the crafting table and places it. After crafting the stone axe and the stone sword, it equips them in the hand and off-hand respectively.
+}

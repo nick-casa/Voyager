@@ -1,0 +1,3 @@
+async function mineAcaciaLogs(bot) {
+    // The function is about mining acacia logs. It checks if there are already 5 acacia logs in the inventory, and if so, it returns. Otherwise, it explores the environment until it finds an acacia tree and moves to it. Once it reaches the tree, it mines acacia logs until there are 5 in the inventory.
+}

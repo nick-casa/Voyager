@@ -1,6 +1,8 @@
+import os
+
 from voyager.prompts import load_prompt
 from voyager.utils.json_utils import fix_and_parse_json
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 
 
@@ -12,7 +14,12 @@ class CriticAgent:
         request_timout=120,
         mode="auto",
     ):
-        self.llm = ChatOpenAI(
+        self.llm = AzureChatOpenAI(
+            openai_api_base= os.environ["AZURE_BASE"],
+            openai_api_version="2023-05-15",
+            deployment_name='gpt4',
+            openai_api_key= os.environ["OPENAI_API_KEY"],
+            openai_api_type="azure",
             model_name=model_name,
             temperature=temperature,
             request_timeout=request_timout,
@@ -100,8 +107,11 @@ class CriticAgent:
 
         critic = self.llm(messages).content
         print(f"\033[31m****Critic Agent ai message****\n{critic}\033[0m")
+
         try:
+            print(critic)
             response = fix_and_parse_json(critic)
+            print(response)
             assert response["success"] in [True, False]
             if "critique" not in response:
                 response["critique"] = ""
